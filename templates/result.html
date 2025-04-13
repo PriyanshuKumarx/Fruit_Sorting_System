@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Fruit Quality Detection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="fas fa-apple-alt mr-2"></i>Fruit Quality Analysis Results</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <div class="result-image-container mb-4">
+                            <img src="{{ url_for('static', filename='uploads/' + image_path) }}" 
+                                class="img-fluid rounded shadow" alt="Uploaded Fruit Image">
+                            <div class="prediction-badge {% if 'rotten' in predicted_class %}badge-danger{% else %}badge-success{% endif %}">
+                                {{ quality }} - {{ confidence }}
+                            </div>
+                        </div>
+                        
+                        <div class="nutrition-card card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-utensils mr-2"></i>Nutrition Facts</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Calories
+                                        <span class="badge badge-light badge-pill">{{ nutrition.get('calories', 'N/A') }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Carbohydrates
+                                        <span class="badge badge-light badge-pill">{{ nutrition.get('carbs', 'N/A') }}g</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Fiber
+                                        <span class="badge badge-light badge-pill">{{ nutrition.get('fiber', 'N/A') }}g</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Vitamin C
+                                        <span class="badge badge-light badge-pill">{{ nutrition.get('vitamin_c', 'N/A') }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-pie mr-2"></i>Prediction Probabilities</h5>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ prob_plot_url }}" class="img-fluid" alt="Prediction Probabilities">
+                            </div>
+                        </div>
+                        
+                        <div class="storage-tip-card card">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="fas fa-box-open mr-2"></i>Storage Recommendation</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <div class="mr-3">
+                                        {% if 'fresh' in predicted_class %}
+                                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                                        {% else %}
+                                        <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <p class="mb-1"><strong>{{ fruit_type }} ({{ quality }})</strong></p>
+                                        <p class="mb-0">{{ storage_tip }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="action-buttons mt-4">
+                            <a href="{{ url_for('home') }}" class="btn btn-primary mr-2">
+                                <i class="fas fa-undo mr-1"></i>Analyze Another Fruit
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="window.print()">
+                                <i class="fas fa-print mr-1"></i>Print Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+   
+                <div class="model-performance mt-4">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="mb-0"><i class="fas fa-tachometer-alt mr-2"></i>Model Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="metric-box text-center p-3">
+                                        <div class="metric-value">{{ (metadata.accuracy * 100)|round(2) }}%</div>
+                                        <div class="metric-label">Accuracy</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="metric-box text-center p-3">
+                                        <div class="metric-value">{{ metadata.roc_auc|round(2) }}</div>
+                                        <div class="metric-label">ROC AUC Score</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="metric-box text-center p-3">
+                                        <div class="metric-value">{{ metadata.training_date }}</div>
+                                        <div class="metric-label">Training Date</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
